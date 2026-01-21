@@ -1,16 +1,11 @@
 package algs
-import (
-	"fmt"
-	"strconv"
-	"strings"
-	"math"
-)
-func selectionSort(arr []int{}){//O(n^2)
+
+func selectionSort(arr []int) { //O(n^2)
 	l := len(arr)
-	for i = 0, i <= len-1, i++{
+	for i := 0; i <= l-1; i++ {
 		min := i
-		for j=i+1, j <= len, j++{
-			if arr[j] < arr[min]{ 
+		for j := i + 1; j <= l; j++ {
+			if arr[j] < arr[min] {
 				min = j
 			}
 		}
