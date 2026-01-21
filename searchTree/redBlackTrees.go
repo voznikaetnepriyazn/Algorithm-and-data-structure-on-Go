@@ -20,16 +20,16 @@ import (
 //большое правое - сначала влево, потом вправо
 //большое левое - сначала направо, потом налево
 
-type Node struct{
+type Node1 struct{
 	data int
 	parent *Node
 	left *Node
 	right *Node
 	balanceFactor int
 }
-func Node(data int, parent *Node, left *Node, right *Node, balanceFactor int){
+func Node1(data int, parent *Node, left *Node, right *Node, balanceFactor int){
 	return &Node{
-		data := data
+		data : data,
 		parent := nil
 		left := nil
 		right := nil
