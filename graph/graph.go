@@ -69,6 +69,7 @@ func main(){
 	var result []string
 	Dfs(graph, startVertex, visited, &result)
 }
+
 //граф представлен матрицей смежности - квадратичная сложность
 func Dfsnon(graph [][]int, start int, visited *[]bool, result *[]int){
 	(*visited)[start] = true
