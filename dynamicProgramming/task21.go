@@ -9,7 +9,7 @@ func MaxProduct(N int, arr []int, k int) int {
 	}
 
 	currentproduct := 1 //сюда вписываем результат умножения
-	for _, i := range k {
+	for i := 0; i <= k; i++ {
 		currentproduct = currentproduct * arr[i]
 	}
 	maxproduct := currentproduct
