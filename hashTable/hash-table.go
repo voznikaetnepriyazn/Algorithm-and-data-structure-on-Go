@@ -16,6 +16,7 @@
 
 //открытая адресация - вставка
 package algs
+
 import (
 	"fmt"
 	"strconv"

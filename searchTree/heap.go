@@ -39,16 +39,16 @@ func siftDown(data []int, n, i int) { //восстановление свойс�
 //О(log n)- получение значения pop
 //О(1) - доступ к максимальному значению
 
-func top() {
-	return heap[0]
+func (m *MaxHeap) top() int {
+	return m.data[0]
 }
-func right() {
+func right(i int) int {
 	return 2*i + 2
 }
-func left() {
+func left(i int) int {
 	return 2*i + 1
 }
-func parent(i int) {
+func parent(i int) int {
 	if i == 0 {
 		return i
 	}
@@ -57,7 +57,8 @@ func parent(i int) {
 
 //добавление элемента
 func (h *MaxHeap) push(data int) {
-	h.heap = append(h.heap, data)
+	var hh []int
+	h = append(hh, data)
 	h.up(len(h.data) - 1)
 }
 
@@ -78,8 +79,8 @@ func (h *MaxHeap) DeleteMax(data []int) int {
 		return 0
 	}
 	//на место удалённого узла передвигаем узел из самого нижнего ряда справа и опускаем его вниз, меняя местами с максимальным потомком
-	n := len(h.data)        //вершина кучи
-	result := h.data[0]     //
+	n := len(h.data) //вершина кучи
+	result := h.data[0]
 	h.data[0] = h.data[n-1] // заменяем корневой элемент на последний элемент в куче
 	h.data = h.data[:n-1]
 	siftDown(data, n-1, 0)

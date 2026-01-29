@@ -1,10 +1,10 @@
-package algs
+package task13
 
 //являются ли бинарный деревья одинаковыми
 type TreeNode struct {
 	data  int
-	left  *Node
-	right *Node
+	left  *TreeNode
+	right *TreeNode
 }
 
 func isSameTree(a, b *TreeNode) any {

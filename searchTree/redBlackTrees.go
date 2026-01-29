@@ -30,10 +30,10 @@ type Node1 struct{
 func Node1(data int, parent *Node, left *Node, right *Node, balanceFactor int){
 	return &Node{
 		data : data,
-		parent := nil
-		left := nil
-		right := nil
-		balanceFactor := 0
+		parent : nil,
+		left : nil,
+		right : nil,
+		balanceFactor : 0,
 	}
 }
 
@@ -42,7 +42,7 @@ type Tree struct{
 }
 func Tree(root *Node){
 	return &Tree{
-		root := nil
+		root : nil,
 	}
 }
 
@@ -64,13 +64,13 @@ func (t *Tree) Insert(key int){
 	node.parent = p
 	if p == nil{
 		t.root = node
-	}
-	else if key < p.data{
+	
+	}else if key < p.data{
 		p.left = node
 	}
 	p.right = node
 
-	t.updateBalance(node)//пересчёт баланса узлов и выполнение необходимых вращений для поддержания сбалансированности дерева
+	t.updateBalance(node) //пересчёт баланса узлов и выполнение необходимых вращений для поддержания сбалансированности дерева
 }
 
 func (t *Tree) updateBalance(node *Tree){
@@ -81,8 +81,8 @@ func (t *Tree) updateBalance(node *Tree){
 	if node.parent != nil{
 		if node == node.parent.left{
 			node.parent.balanceFactor -= 1
-		}
-		else if node == node.parent.right{
+
+		}else if node == node.parent.right{
 			node.parent.balanceFactor += 1
 		}
 	}
@@ -102,9 +102,8 @@ func (t *Tree) reBalance(node *Tree){
 			t.leftRotate(node)
 		}
 		t.leftRotate(node)
-	}
-
-else if node.balanceFactor < 0{
+	
+	}else if node.balanceFactor < 0{
 	if node.left.balanceFactor > 0{
 		t.leftRotate(node.left)
 		t.rightRotate(node)
@@ -116,42 +115,44 @@ else if node.balanceFactor < 0{
 func (t *Tree) leftRotate( node *Tree){
 	rightChild := node.right
 
-	node.right = rightChild.left//правый потомок становится на место текущего узла, а его левое поддерево перемещается в правое поддерево текущего узла
-	if rightChild.left != nil{//если у правого потомка есть левое поддерево
-		rightChild.left.parent = node//родитель обновляется на текущий узел
+	node.right = rightChild.left //правый потомок становится на место текущего узла, а его левое поддерево перемещается в правое поддерево текущего узла
+	if rightChild.left != nil{ //если у правого потомка есть левое поддерево
+		rightChild.left.parent = node //родитель обновляется на текущий узел
 	}
 
-	rightChild.parent = node.parent//правый потомок становится на место текущего узла, поэтому его родитель должен быть обновлён
-	if node.parent != nil{//если текущий узел был корнем
-		t.root = rightChild//правый потомок становится ноым корнем
+	rightChild.parent = node.parent //правый потомок становится на место текущего узла, поэтому его родитель должен быть обновлён
+	if node.parent != nil{ //если текущий узел был корнем
+		t.root = rightChild //правый потомок становится ноым корнем
+	
+	}else if node == node.parent.left{ //если текущий узел был потомком своего родителя
+		node.parent.left = rightChild //родительский указатель обновляется на правого потомка
 	}
-	else if node == node.parent.left{//если текущий узел был потомком своего родителя
-		node.parent.left = rightChild//родительский указатель обновляется на правого потомка
-	}
-	node.parent.right = rightchild//обновляется правый указатель родителя
+	node.parent.right = rightchild //обновляется правый указатель родителя
 
 	rightChild.left = node
-	node.parent = rightChild//после перемещения узел становится левым потомком правого потомка
+	node.parent = rightChild //после перемещения узел становится левым потомком правого потомка
 
 	node.balanceFactor = node.balanceFactor - 1 -max(0, rightChild.balanceFactor)
 	rightChild.balanceFactor = rightChild.balanceFactor - 1 + min(0, node.balanceFactor)
 }
 
-
-type RedBlackTree struct{
-	const(
+const(
 		Red = 1
 		Black = 0
 	)
-	type Node struct{
+
+type NodeBlack struct{
 		data int
 		left *Node
 		right *Node
 		parent *Node
 		color int
 	}
+type RedBlackTree struct{
+	Node *NodeBlack
+	
 }
-func Node(data int) *Node{
+func InitNode(data int) *Node{
 	return &Node{
 		data: data,
 		left: nil,
@@ -182,8 +183,8 @@ func (t *RedBlackTree) fixInsert(node *Node){
 			node.parent.parent.color = red
 			//переходим к дедушке
 			node = node.parent.parent
-		}
-		else{
+		
+		}if else{
 			if node == node.parent.right{
 			//узел является правым потомком своего родителя - делаем правый поворот
 			node = node.parent
@@ -193,8 +194,8 @@ func (t *RedBlackTree) fixInsert(node *Node){
 		node.parent.color = Black
 		node.parent.parent.color = Red
 		node.rightRotate(node.parent.parent)
-		}
-		else{
+		
+		}if else{
 			//родительский узел является правым потомком своего родителя
 			uncle = node.parent.leftRotate
 
