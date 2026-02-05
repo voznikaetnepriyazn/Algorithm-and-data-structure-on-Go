@@ -1,10 +1,4 @@
 package algs
-import (
-	"fmt"
-	"strconv"
-	"strings"
-	"math"
-)
 
 //сетевая структура данных, состоит из вершин/узлов и рёбер/связей G=(V,E) v - вершины, g - ребра
 //смежные вершины - соединены 1 ребром, инцидентное ребро - имеет общую вершину с другим ребром
@@ -25,7 +19,6 @@ import (
 //формула для суммы степеней вершин правильного графа 2*m=k*n(m - кол-во ребер, n - кол-во вершин, k - степень каждой вершины)
 //двудольный граф G=(V,E) - мн-во вершин V можно разбить на 2 непересекающихся подмн-ва u и v так, что каждое ребро их мн-ва Е соединяет вершины из разных подмн-в
 
-
 //матрица смежности - квадратная размером n*n
 //элемент матрицы с координатами i, j указывает на то, являются ли смежными соответствующие вершины, соединены - 1, иначе - 0
 //в мультиграфе кратные ребра суммируются
@@ -42,19 +35,18 @@ import (
 //явное задание графа - каждое ребро задается парой инцидентных ему вершин
 //список ребер
 
-
 //обход в глубину dfs, O(V+E) - граф представлен словарем смежности
-func Dfs(graph map[string][]string, start string, visited map[string]bool, result *[]string){
+func DfsGraph(graph map[string][]string, start string, visited map[string]bool, result *[]string) {
 	visited[start] = true
 	*result = append(*result, start)
 
-	for _, neighbor := range graph[start]{
-		if !visited[neighbor]{
-			dfs9graph, neighbor, visited, result
+	for _, neighbor := range graph[start] {
+		if !visited[neighbor] {
+			DfsGraph(graph, neighbor, visited, result)
 		}
 	}
 }
-func main(){
+func main() {
 	graph := map[string][]string{
 		"A": {"B", "C"},
 		"B": {"D", "E"},
@@ -67,16 +59,16 @@ func main(){
 	startVertex := "A"
 	visited := make(map[string]bool)
 	var result []string
-	Dfs(graph, startVertex, visited, &result)
+	DfsGraph(graph, startVertex, visited, &result)
 }
 
 //граф представлен матрицей смежности - квадратичная сложность
-func Dfsnon(graph [][]int, start int, visited *[]bool, result *[]int){
+func Dfsnon(graph [][]int, start int, visited *[]bool, result *[]int) {
 	(*visited)[start] = true
 	*result = append(*result, start)
 
-	for v := 0; v < len(graph); v++{
-		if graph[start][v] == 1 && (*visited)[v]{
+	for v := 0; v < len(graph); v++ {
+		if graph[start][v] == 1 && (*visited)[v] {
 			Dfsnon(graph, v, visited, result)
 		}
 	}
@@ -94,36 +86,34 @@ func Main() {
 	n := len(graph)
 	visited := make([]bool, n)
 	var result []int
-	startVertex := 0//стартуем с вершины 0
+	startVertex := 0 //стартуем с вершины 0
 	Dfsnon(graph, startVertex, &visited, &result)
 }
 
 //компонента связности - подмножество вершин графа, каждая вершина из одной группы связана с другими вершинами этой же группы
 //цикл в неоринтированном графе - путь из вершины в неё же, при котором обходятся все ребра цикла
 
-
 //обход в ширину - похоже на бинарное дерево
-
-func Bfs(graph map[string][]string, start string) []string{
+func Bfs(graph map[string][]string, start string) []string {
 	visited := make(map[string]bool)
 	queue := []string{start}
 	var result []string
 
-	for len(queue) > 0{
+	for len(queue) > 0 {
 		//извлекаем 1 элемент из очереди
 		vertex := queue[0]
 		queue = queue[1:]
-	}
 
-	if !visited[vertex] {
-		result = append(result, vertex)
-		visited[vertex] = true
-	}
+		if !visited[vertex] {
+			result = append(result, vertex)
+			visited[vertex] = true
+		}
 
-	//добавляем непосещенных соcедей в очередь
-	for _, neighbor := range graph[vertex]{
-		if !visited[neighbor] {
-			queue = append(queue, neighbor)
+		//добавляем непосещенных соcедей в очередь
+		for _, neighbor := range graph[vertex] {
+			if !visited[neighbor] {
+				queue = append(queue, neighbor)
+			}
 		}
 	}
 	return result

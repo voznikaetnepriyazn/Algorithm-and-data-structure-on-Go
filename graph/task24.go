@@ -2,34 +2,38 @@ package algs
 
 //посчитать кол-во компонент связности
 func FindConnectedComponents(graph map[int][]int) [][]int {
-	visited := make(map[int]bool)        //для хранения посещенных вершин
-	connectedComponents := make([][]int) //для хранения компонент связности
+	visited := make(map[int]bool)  //для хранения посещенных вершин
+	components := make([][]int, 0) //для хранения компонент связности
 
-	for i := 1; i <= len(graph); i++ {
-		visited[i] = false
-	}
-
-	//в цикле по графу для каждой непосещенной вершины запускаем dfs
-	for i := 1; i <= len(graph); i++ {
-		currentNode := graph[i]
-		if !visited[currentNode] {
-			//для каждого запуска создаем массив, в котором храним текущий подграф
-			component := make([]int)
-			Dfs(graph, currentNode, visited, component)
-			//добавляем массив в connectedComponents
-			connectedComponents = append(connectedComponents, component)
+	//итерируемся по всем вершинам графа (ключам мапы)
+	for vertex := range graph {
+		if !visited[vertex] {
+			var component []int
+			Dfs24(graph, vertex, visited, &component)
+			components = append(components, component)
 		}
 	}
-	return connectedComponents
+
+	//обрабатываем изолированные вершины (которые есть в соседях, но не как ключи)
+	for _, neighbors := range graph {
+		for _, v := range neighbors {
+			if !visited[v] {
+				var component []int
+				Dfs24(graph, v, visited, &component)
+				components = append(components, component)
+			}
+		}
+	}
+	return components
 }
 
-func Dfs(graph map[string][]string, v int, visited map[int]bool, component *[]string) { //v - вершина
+func Dfs24(graph map[int][]int, v int, visited map[int]bool, component *[]int) { //v - вершина
 	visited[v] = true
 	*component = append(*component, v)
 
 	for _, neighbor := range graph[v] {
 		if !visited[neighbor] {
-			Dfs(graph, neighbor, visited, component)
+			Dfs24(graph, neighbor, visited, component)
 		}
 	}
 }

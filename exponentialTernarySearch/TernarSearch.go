@@ -47,7 +47,7 @@ func TernarySearch(data []int, target int) int {
 		} else if target > data[m2] {
 			left = m2 + 1
 		}
-		return left
+		//return left
 	}
 	return -1
 }

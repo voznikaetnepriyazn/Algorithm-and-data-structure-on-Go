@@ -6,7 +6,7 @@ import (
 )
 
 //алгоритм дейкстры - поиск кратчайшего пути
-//взвешенный граф - у ребер есть занчения
+//взвешенный граф - у ребер есть значения
 //для вершины ставим значение 0
 
 type Item struct { //элемент в очереди с приоритетом
@@ -17,15 +17,15 @@ type Item struct { //элемент в очереди с приоритетом
 
 type PriorityQueue []*Item
 
-func (q *PriorityQueue) Len() int {
+func (q PriorityQueue) Len() int {
 	return len(q)
 }
 
-func (q *PriorityQueue) Less(i, j int) bool {
+func (q PriorityQueue) Less(i, j int) bool {
 	return q[i].distance < q[j].distance
 }
 
-func (q *PriorityQueue) Swap(i, j int) {
+func (q PriorityQueue) Swap(i, j int) {
 	q[i], q[j] = q[j], q[i]
 	q[i].index = i
 	q[j].index = j
@@ -49,18 +49,18 @@ func (q *PriorityQueue) Pop() any {
 	return item
 }
 
-func Dijkstra(graph map[string]map[string]float64, start string) {
+func Dijkstra(graph map[string]map[string]float64, start string) map[string]float64 {
 	distances := make(map[string]float64)
 	for vertex := range graph {
 		distances[vertex] = math.Inf(1)
 	}
 	distances[start] = 0
 
-	q := *&PriorityQueue{}
+	q := &PriorityQueue{}
 	heap.Init(q)
 	heap.Push(q, &Item{vertex: start, distance: 0})
 
-	for q.Len > 0 {
+	for q.Len() > 0 {
 		current := heap.Pop(q).(*Item)
 		currentVertex := current.vertex
 		currentDistance := current.distance
@@ -73,7 +73,7 @@ func Dijkstra(graph map[string]map[string]float64, start string) {
 			distance := currentDistance + weight
 			if distance < distances[neighbor] {
 				distances[neighbor] = distance
-				heap.Push(q, &Item{vertex: neigbor, distance: distance})
+				heap.Push(q, &Item{vertex: neighbor, distance: distance})
 			}
 		}
 	}

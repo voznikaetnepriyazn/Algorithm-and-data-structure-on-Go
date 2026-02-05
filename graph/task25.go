@@ -4,7 +4,7 @@ package algs
 //граф задан в виде словаря вершин
 //если в процессе dfs соседняя вершина уже была посещена и не являетс родительской для текущей вершины, в графе есть цикл
 
-func Dfs(graph map[string][]string, vertex int, parent string, visited map[string]bool) bool {
+func Dfs(graph map[string][]string, vertex string, parent string, visited map[string]bool) bool {
 	visited[vertex] = true
 
 	for _, neighbor := range graph[vertex] {
@@ -17,7 +17,7 @@ func Dfs(graph map[string][]string, vertex int, parent string, visited map[strin
 	return false
 }
 
-func HasCycle(graph map[string][]string) {
+func HasCycle(graph map[string][]string) bool {
 	visited := make(map[string]bool) //массив посещенных узлов
 
 	for vertex := range graph {
