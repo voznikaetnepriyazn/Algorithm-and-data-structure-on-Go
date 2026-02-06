@@ -4,7 +4,7 @@ import (
 	"sort"
 )
 
-func FeedAnimals(animals, food []int) {
+func FeedAnimals(animals, food []int) int {
 	if len(animals) == 0 || len(food) == 0 {
 		return 0
 	}

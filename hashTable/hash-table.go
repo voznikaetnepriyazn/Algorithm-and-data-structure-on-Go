@@ -4,7 +4,7 @@
 //метод остатка от деления - h(k) = k%m, индекс в результате такого преобразования не выйдет за пределы m-1
 //m - простое число, отличное от степени 2
 //метод умножения - h(k) = m * (k*A)mod 1 - округляем до наименьшего целого
-//А - вещественное число, константа 0<A<1, А*k - тоже вещественное, mod выделяет вещественную часть, A должно быть между 0 и 1Б чтобы было 
+//А - вещественное число, константа 0<A<1, А*k - тоже вещественное, mod выделяет вещественную часть, A должно быть между 0 и 1Б чтобы было
 //максимально равномерное распределение между 0 и m-1, и округлить в наименьшую сторону, А = 0,618
 //чтобы убрать ограничения на возможные значения m
 
@@ -14,92 +14,86 @@
 //метод цепочек - на каждое одинаковое значение создается связанный список, если список есть - значение дописывается в конец, О(n)
 //метод открытой адрессации - при совпадении индексов храним значение в соседней ячейке
 
-//открытая адресация - вставка
+// открытая адресация - вставка
 package algs
 
-import (
-	"fmt"
-	"strconv"
-	"strings"
-	"math"
-)
-const(
-	m = 10
-	REMOVED = "REMOVED"
+const (
+	m       = 10        // размер хэш-таблицы
+	REMOVED = "REMOVED" // маркер удалённого элемента
+	EMPTY   = ""        // пустая ячейка
 )
 
-var T [m]string
+type entry struct {
+	key   string
+	value string
+}
 
-func Insert(key,value string){
-	for i := 0, i < m, i++{//h(v) для любых k находится в диапазоне [0, m-1]
-		hash := (h(v) + i) % m //не превышает m
-		if T[hash] == nil || T[hash] == REMOVED{
-			T[hash] = value
+var T [m]entry
+
+func Insert(key, value string) {
+	for i := 0; i < m; i++ {
+		hash := (h(key) + i) % m
+
+		if T[hash].key == EMPTY || T[hash].key == REMOVED {
+			T[hash] = entry{key: key, value: value}
+			return
+		}
+
+		if T[hash].key == key {
+			T[hash].value = value
 			return
 		}
 	}
 }
 
-func h(key string) int{
+func h(key string) int {
 	hash := 0
-	for _, c := range key{
+	for _, c := range key {
 		hash += int(c)
 	}
 	return hash % m
 }
-//открытая адресация - выборка
-const(
-	m = 10
-)
 
-var T [m]string
+//открытая адресация - выборкa
 
-func Get(key string){
-	for i < m{
-		hash := (h(v) + i) % m
-	}
-	if T[hash] != nil{
-		if T[hash].key == key{
-			return T[hash]
+func Get(key string) (string, bool) {
+	for i := 0; i < m; i++ {
+		hash := (h(key) + i) % m
+
+		// Пустая ячейка — дальше искать бесполезно (элемент не существует)
+		if T[hash].key == EMPTY {
+			return "", false
 		}
-		return nil
-	}
-}
 
-func h(key string) int{
-	hash := 0
-	for _, c := range key{
-		hash += int(c)
-	}
-	return hash % m
-}
-
-//открытая адресация - удаление
-func Remove(key string){
-	for i < m{
-		hash := (h(v) + i) % m
-	}
-	if T[hash] != nil && T[hash] != REMOVED{
-		if T[hash].key == key{
-			T[hash] = REMOVED
+		// Нашли ключ — возвращаем значение
+		if T[hash].key == key {
+			return T[hash].value, true
 		}
-		return T[hash]
+
+		// REMOVED — продолжаем поиск (элемент мог быть удалён ранее)
+		// Ячейка с другим ключом — продолжаем поиск из-за коллизии
 	}
+	return "", false // не найдено
 }
 
-const(
-	m = 10
-	REMOVED = "REMOVED"
-)
+func Remove(key string) bool {
+	for i := 0; i < m; i++ {
+		hash := (h(key) + i) % m
 
-var T [m]string
+		// Пустая ячейка — элемент не существует
+		if T[hash].key == EMPTY {
+			return false
+		}
 
-func h(key string) int{
-	hash := 0
-	for _, c := range key{
-		hash += int(c)
+		// Нашли ключ — помечаем как удалённый
+		if T[hash].key == key {
+			T[hash] = entry{key: REMOVED, value: ""}
+			return true
+		}
+
+		// REMOVED или другой ключ — продолжаем поиск
 	}
-	return hash % m
+	return false // не найдено
 }
 
 //метод двойного хэширования - если ячейка k занята, рассматриваем h(k) + h1(k) % m, затем h(k) + 2*h1(k) % m
