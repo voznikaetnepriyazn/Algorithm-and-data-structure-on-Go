@@ -1,12 +1,14 @@
 package algs
 
 func Maxx(str string) int {
-	count := make(map[string]int)
-	for i := 0; i < len(str); i++ {
-		count[str[i]]++
+	count := make(map[rune]int)
+	for _, char := range str {
+		count[char]++
 	}
+
 	max := 0
-	for i, j := range count {
+
+	for _, j := range count {
 		if j > max {
 			max = j
 		}

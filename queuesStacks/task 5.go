@@ -1,111 +1,132 @@
 package algs
-import (
-	"fmt"
-	"strconv"
-	"strings"
-)
-type Deque struct{
-	head,tail *Node
-	size int
-}
 
-type Node struct{
+//Deque (двусвязная очередь)
+type Node3 struct {
 	value int
-	prev, next *Node
+	prev  *Node3
+	next  *Node3
 }
 
-func NewDeque() *Deque{
-	head := &Node{}
-	tail := &Node{}
-	head.next := tail
-	tail.prev := head
+type Deque struct {
+	head, tail *Node3
+	size       int
+}
+
+func NewDeque() *Deque {
+	head := &Node3{}
+	tail := &Node3{}
+	head.next = tail
+	tail.prev = head
 	return &Deque{
-		head : head,
-		tail : tail,
-		size : 0,
+		head: head,
+		tail: tail,
+		size: 0,
 	}
 }
 
-type Node struct{
-	data int
-	next *Node
-}
-
-func Node() *Node{
-	return &Node{
-		data := data
-		next := nil
+func (d *Deque) PushBack(value int) {
+	newNode := &Node3{
+		value: value,
+		prev:  d.tail.prev,
+		next:  d.tail,
 	}
-}
-
-type Stack struct{
-	top Node
-}
-
-func Stack() *Stack{
-	return &Stack{
-		top : nil
-	}
-}
-
-//является ли одна строка исходной для другой
-
-func (d *Deque) PushBack(value int){
-	newNode := &Node{
-		value := value
-		prev = d.head
-		next = d.head.next
-	}
-	newNode.next := d.tail
-	newNode.prev := d.tail.prev
 	d.tail.prev.next = newNode
 	d.tail.prev = newNode
 	d.size++
 }
-func (s *Stack) Push(data int){
-	node := &Node{
-		data : data
-	}
 
-	if s.top == nil{
-		s.top = node
-		return
+func (d *Deque) PopFront() int {
+	if d.size == 0 {
+		panic("deque is empty")
 	}
+	node := d.head.next
+	d.head.next = node.next
+	node.next.prev = d.head
+	d.size--
+	return node.value
+}
+
+func (d *Deque) PopBack() int {
+	if d.size == 0 {
+		panic("deque is empty")
+	}
+	node := d.tail.prev
+	d.tail.prev = node.prev
+	node.prev.next = d.tail
+	d.size--
+	return node.value
+}
+
+func (d *Deque) Len() int {
+	return d.size
+}
+
+//Stack (стек на односвязном списке)
+type Node4 struct {
+	data int
+	next *Node4
+}
+
+func InitNode4(data int) *Node4 {
+	return &Node4{
+		data: data,
+		next: nil,
+	}
+}
+
+type Stack3 struct {
+	top  *Node4
+	size int
+}
+
+func NewStack() *Stack3 {
+	return &Stack3{
+		top:  nil,
+		size: 0,
+	}
+}
+
+func (s *Stack3) Push(data int) {
+	node := InitNode4(data)
 	node.next = s.top
 	s.top = node
-}
-func (s *Stack) Pop() {
-	if s.IsEmpty(){
-		fmt.Println("empty")
-	}
-	element := s.stack[s.top]
-	s.top = s.top - 1
-	return element
+	s.size++
 }
 
-func IsSubsequence(a,b string) bool{
-	q := q.list.New()
+func (s *Stack3) IsEmpty() bool {
+	return s.top == nil
+}
 
-	for _, ch := range a{
-		q.PushBack(ch)
+func (s *Stack3) Pop() int {
+	if s.IsEmpty() {
+		panic("stack is empty")
 	}
+	value := s.top.data
+	s.top = s.top.next
+	s.size--
+	return value
+}
 
-	for _, ch := range b{
-		if q.Len() == 0{
-			break
+func (s *Stack3) Size() int {
+	return s.size
+}
+
+//Проверка подпоследовательности
+func IsSubsequence(a, b string) bool {
+	i := 0 // указатель для строки a
+	for j := 0; j < len(b) && i < len(a); j++ {
+		if a[i] == b[j] {
+			i++
 		}
-		if q.Front().value == ch{
-			q.Pop(q.Front())
-		}
 	}
-	return q.Len() == 0
-	
+	return i == len(a)
 }
 
-func IsSubsequenceVar(a, b string){  //O(n)
+// Альтернативная реализация (та же логика)
+func IsSubsequenceVar(a, b string) bool {
 	i, j := 0, 0
-	for i < len(a) && j < len(b){
-		if a[i] == b[j]{
+	for i < len(a) && j < len(b) {
+		if a[i] == b[j] {
 			i++
 		}
 		j++
@@ -113,39 +134,41 @@ func IsSubsequenceVar(a, b string){  //O(n)
 	return i == len(a)
 }
 
-//является ли слово палиндромом  O(n)
-func IsPalindrome(s string){
-	stack := make([]interface{}, len(s))//используем стэк
-	for _, i range s{
-		stack.Push(i)
+//Проверка палиндрома
+// Через стек (используем слайс как стек)
+func IsPalindrome(s string) bool {
+	stack := []rune{}
+	for _, ch := range s {
+		stack = append(stack, ch)
 	}
-	for _, j range s{
-		if j != stack.Pop(){
+	for _, ch := range s {
+		if ch != stack[len(stack)-1] {
 			return false
 		}
-	}
-	return true
-}
-func IsPalindromeVar(s string){//используем дэк
-	var deq Deque
-	for _, i range deq{
-		deq.PushBack(i)
-	}
-	for deq.Len() > 1{
-		if deq.head != deq.tail{
-			return false
-		}
-		deq.PopFront(deq.head)
-		deq.PopBack(deq.tail)
+		stack = stack[:len(stack)-1]
 	}
 	return true
 }
 
-func IsPalind(s string){//метод 2ух указателей O(n)
-	left := 0
-	right := len(s) - 1
-	for left < right{
-		if s[left] != s[right]{
+// Через дек
+func IsPalindromeVar(s string) bool {
+	deq := NewDeque()
+	for _, ch := range s {
+		deq.PushBack(int(ch))
+	}
+	for deq.Len() > 1 {
+		if deq.PopFront() != deq.PopBack() {
+			return false
+		}
+	}
+	return true
+}
+
+// Через два указателя (самый эффективный способ)
+func IsPalind(s string) bool {
+	left, right := 0, len(s)-1
+	for left < right {
+		if s[left] != s[right] {
 			return false
 		}
 		left++
@@ -153,44 +176,43 @@ func IsPalind(s string){//метод 2ух указателей O(n)
 	}
 	return true
 }
-//удалить элемент из односвязного списка - добавить фиктивный узел перед head
-type ListNode struct{
+
+//Удаление элемента из односвязного списка
+type ListNode1 struct {
 	data int
-	next *ListNode
+	next *ListNode1
 }
 
-func ListNode *ListNode{
-	return &ListNode{
-		data := data
-		next := nil
+func NewListNode(data int) *ListNode1 {
+	return &ListNode1{
+		data: data,
+		next: nil,
 	}
 }
 
-func RemoveElement(head *ListNode, val int){  //O(n)
-	var dummy ListNode
-	dummy.next := head
+// Исправлена логика удаления: всегда двигаем current вперед
+func RemoveElement(head *ListNode1, val int) *ListNode1 {
+	dummy := &ListNode1{next: head}
 	prev := dummy
-	current = head
+	current := head
 
-	for current != nil{
-		if current.data == val{
-			prev.next = current.next//двигаем на узел вперед
+	for current != nil {
+		if current.data == val {
+			prev.next = current.next // пропускаем текущий узел
+		} else {
+			prev = current // двигаем prev только если не удалили
 		}
-		prev = current//у предыдущего узла перепишем значение в поле некст
-		current = current.next//двигаем на узел вперед
+		current = current.next // всегда двигаем current
 	}
 	return dummy.next
 }
 
-func Found(s []interface{}, n int){
-	arr := make([]interface{}, n)
-	for _, i range s{
-		arr.PushBack(i)
-	}
+//Поиск последнего четного числа
+func Found(s []int) int {
 	last := -1
-	for i := n, i >= 0, i--{
-		if arr[i] % 2 == 0{
-			last := arr[i]
+	for i := len(s) - 1; i >= 0; i-- {
+		if s[i]%2 == 0 {
+			last = s[i]
 			break
 		}
 	}

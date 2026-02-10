@@ -7,7 +7,7 @@ type TreeNode struct {
 	right *TreeNode
 }
 
-func isSameTree(a, b *TreeNode) any {
+func isSameTree(a, b *TreeNode) bool {
 	if a == nil && b == nil {
 		return true
 	}

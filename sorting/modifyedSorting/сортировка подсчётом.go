@@ -43,5 +43,5 @@ func countingSort(arr []int) []int {
 			c--
 		}
 	}
-	return
+	return sorted
 }

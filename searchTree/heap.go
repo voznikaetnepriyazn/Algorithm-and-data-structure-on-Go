@@ -58,7 +58,7 @@ func parent(i int) int {
 //добавление элемента
 func (h *MaxHeap) push(data int) {
 	var hh []int
-	h = append(hh, data)
+	hh = append(hh, data)
 	h.up(len(h.data) - 1)
 }
 

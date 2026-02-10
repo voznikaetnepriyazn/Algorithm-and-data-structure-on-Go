@@ -53,10 +53,11 @@ func dept(root *TreeNode2, res []int) []int {
 	return res
 }
 
-func IsSymmetricDFS(root *TreeNode) bool {
+func IsSymmetricDFS(root *TreeNode2) bool {
 	if root == nil {
 		return true
 	}
+	res := make([]int, 0)
 	data := []int{}
 	data = dept(root, res)
 	j := len(data) - 1

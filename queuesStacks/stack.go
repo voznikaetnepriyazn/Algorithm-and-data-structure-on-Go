@@ -6,30 +6,30 @@ import (
 	"fmt"
 )
 
-type Node struct {
+type Node1 struct {
 	data int
-	next *Node
+	next *Node1
 }
 
-func Node() *Node {
-	return &Node{
+func InitNode1(data int) *Node1 {
+	return &Node1{
 		data: data,
 		next: nil,
 	}
 }
 
-type Stack struct {
-	top Node
+type Stack1 struct {
+	top *Node1
 }
 
-func Stack() *Stack {
-	return &Stack{
+func InitStack() *Stack1 {
+	return &Stack1{
 		top: nil,
 	}
 }
 
-func (s *Stack) Push(data int) {
-	node := &Node{
+func (s *Stack1) Push(data int) {
+	node := &Node1{
 		data: data,
 	}
 
@@ -37,53 +37,47 @@ func (s *Stack) Push(data int) {
 		s.top = node
 		return
 	}
-	node.next = s.top
 	s.top = node
 }
 
-func (s *Stack) Pop() {
+func (s *Stack1) Pop() (int, error) {
 	if s.top == nil {
-		s.top = node
-		return
+		return 0, fmt.Errorf("стек пуст")
 	}
-	if s.top.next != nil {
-		s.top = s.top.next
-	}
-	s.top = nil
-
-	return s.top.data
+	data := s.top.data
+	s.top = s.top.next
+	return data, nil
 }
 
 // реализация стека на массиве - добавление элементов в конец(не в начало)- иначе придется сдвигать массив - О(1)
 // слайс - если неизвестно сколько данных
-type Stack struct {
+type Stack2 struct {
 	stack []interface{}
 	top   int
 }
 
-func NewStack(step int) *Stack {
-	return &Stack{
+func NewStack2(step int) *Stack2 {
+	return &Stack2{
 		stack: make([]interface{}, step),
-		top:   nil,
 	}
 }
 
-func (s *Stack) IsEmpty() bool {
-	return s.top == nil
+func (s *Stack2) IsEmpty() bool {
+	return s.top == 0
 }
 
-func (s *Stack) IsFull(size int) {
+func (s *Stack2) IsFull(size int) bool {
 	return s.top == size-1
 }
 
-func (s *Stack) Push(element interface{}, size int) {
+func (s *Stack2) Push(element interface{}, size int) {
 	if s.IsFull(size) {
 		fmt.Println("full")
 	}
 	s.top++
 	s.stack[s.top] = element
 }
-func (s *Stack) Pop() {
+func (s *Stack2) Pop() interface{} {
 	if s.IsEmpty() {
 		fmt.Println("empty")
 	}
@@ -91,7 +85,7 @@ func (s *Stack) Pop() {
 	s.top = s.top - 1
 	return element
 }
-func (s *Stack) Top() interface{} { //получаем верхний элемент без удаления
+func (s *Stack2) Top() interface{} { //получаем верхний элемент без удаления
 	if s.IsEmpty() {
 		fmt.Println("empty")
 	}

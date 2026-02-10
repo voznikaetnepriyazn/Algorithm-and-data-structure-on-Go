@@ -8,50 +8,47 @@ package algs
 // - равное индексу этого символа, если символ уже встречался, то берется самое правое(меньшее) значение, для нулевого индекса - значение, равное значению строки
 //смещение для символов, не встречающихся в шаблоне - длина строки
 //если несовпадение произошло не на первом символе, а на последующем, берем смещение для последнего символа подстроки
-func BoyerMureHorsepule(text, pattern string) any { //O(n)
 
-	len_text := len(text)
-	len_pattern := len(pattern)
-	if len_pattern > len_text {
+func BoyerMooreHorspool(text, pattern string) int {
+	lenText := len(text)
+	lenPattern := len(pattern)
+
+	// Проверка граничных случаев
+	if lenPattern == 0 || lenPattern > lenText {
 		return -1
 	}
-	if len_text || len_pattern == nil {
-		return -1
+
+	// Построение таблицы смещений (эвристика плохого символа)
+	// Для символов, не встречающихся в шаблоне, смещение = длина шаблона
+	shift := make(map[byte]int)
+	for i := 0; i < 256; i++ {
+		shift[byte(i)] = lenPattern
 	}
 
-	offset := make(map[byte]int) //таблица смещений
-	for _, i := range len_pattern - 1 {
-		offset[pattern[i]] = len_pattern - 1 - i
+	// Для символов шаблона (кроме последнего) смещение = расстояние до конца
+	for i := 0; i < lenPattern-1; i++ {
+		shift[pattern[i]] = lenPattern - 1 - i
 	}
 
-	skipVal := len_pattern - 1 //индекс последнего символа, с которого нужно начать проверку
-	for skipVal < len_text {
-		match := true
-		var lastIndex int
-		var currentLetter byte
-		for i := 0; i < len_pattern; i++ {
-			lastIndex = i
-			currentLetter = text[skipVal-i]
-			if pattern[len_pattern-i-1] != text[skipVal-i] {
-				match = false
-				break
-			}
-		}
-		if match {
-			return skipVal - len_pattern + 1
-		}
-		if lastIndex > 0 {
-			skipVal += offset[pattern[len_pattern-1]]
-			continue
+	// Поиск подстроки
+	i := lenPattern - 1 // начинаем с последнего символа шаблона
+	for i < lenText {
+		k := 0
+		// Сравниваем символы справа налево
+		for k < lenPattern && pattern[lenPattern-1-k] == text[i-k] {
+			k++
 		}
 
-		skip, ok := offset[currentLetter]
-		if !ok {
-			skip = len_pattern
+		if k == lenPattern {
+			// Найдено совпадение
+			return i - lenPattern + 1
 		}
-		skipVal += skip
 
+		// Сдвигаем шаблон на основе таблицы смещений
+		// Используем символ текста, который выровнен с последним символом шаблона
+		i += shift[text[i]]
 	}
+
 	return -1
 }
 
@@ -61,46 +58,58 @@ func BoyerMureHorsepule(text, pattern string) any { //O(n)
 //сравниваются хэши отрезка строки и подстроки. при совпадении - сравнение символов
 //при несовпадении смещаем отрезок поиска и продолжаем до конца строки
 
-//скользящая хэш - функция - переиспользование вычисленного хэша
-func Hash(l string) any {
-	result := rune(l[0])
-	x := 31
-	q := 2147483647
-	for _, i := range len(l) - 1 {
-		result = result*x + rune(l[i+1])
+//скользящая хэш-функция - переиспользование вычисленного хэша
+func simpleHash(s string, base, mod int) int {
+	hash := 0
+	for i := 0; i < len(s); i++ {
+		hash = (hash*base + int(s[i])) % mod
 	}
-	return result % q
+	return hash
 }
-func RabinaKarpa(text, pattern string) any {
-	x := 31
-	q := 2147483647
-	patternHash := Hash(pattern)
-	m := len(pattern)
-	n := len(text)
 
-	if m > n {
+func RabinKarp(text, pattern string) int {
+	const base = 256       // размер алфавита (расширенный ASCII)
+	const mod = 1000000007 // большое простое число для модуля
+
+	lenText := len(text)
+	lenPattern := len(pattern)
+
+	// Проверка граничных случаев
+	if lenPattern == 0 || lenPattern > lenText {
 		return -1
 	}
-	patternHash = simpleHash(pattern, x, q)
-	currentHash := simpleHash(text[:m], x, q)
 
-	highPow := 1
-	for i := 0; i < m-1; i++ {
-		highPow = (highPow * x) % q
+	// Вычисляем хэш шаблона и первого окна текста
+	patternHash := simpleHash(pattern, base, mod)
+	windowHash := simpleHash(text[:lenPattern], base, mod)
+
+	// Предвычисляем значение base^(lenPattern-1) % mod для скользящего хэша
+	h := 1
+	for i := 0; i < lenPattern-1; i++ {
+		h = (h * base) % mod
 	}
-	for i := 0; i < n-m; i++ {
-		if patternHash == currentHash {
-			if text[i:i+m] == pattern {
+
+	// Поиск подстроки
+	for i := 0; i <= lenText-lenPattern; i++ {
+		// Если хэши совпадают — проверяем полное совпадение строк
+		if patternHash == windowHash {
+			if text[i:i+lenPattern] == pattern {
 				return i
 			}
 		}
-		if i < n-m {
-			currentHash = (currentHash - int(text[i])*highPow) * x
-			currentHash = (currentHash + int(text[i+m])) % q
-			if currentHash < 0 {
-				currentHash += q
+
+		// Обновляем хэш для следующего окна (скользящий хэш)
+		// Удаляем старый символ слева и добавляем новый справа
+		if i < lenText-lenPattern {
+			windowHash = (windowHash - int(text[i])*h) % mod
+			windowHash = (windowHash*base + int(text[i+lenPattern])) % mod
+
+			// Обработка отрицательных значений
+			if windowHash < 0 {
+				windowHash += mod
 			}
 		}
 	}
+
 	return -1
 }

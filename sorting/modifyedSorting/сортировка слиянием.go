@@ -1,33 +1,37 @@
 package algs
-import (
-	"fmt"
-	"strconv"
-	"strings"
-	"math"
-)
-func mergeSort(arr []int{}) []int{//O(n log(n))
-	if len(arr) < 2{
+
+// mergeSort сортирует массив с использованием алгоритма слияния (O(n log n))
+func mergeSort(arr []int) []int {
+	if len(arr) < 2 {
 		return arr
 	}
-	mid := len(arr)/2
 
-	left := [:mid]
-	right := [mid:]
+	mid := len(arr) / 2
 
-	return merge(mergeSort(left), mergeSort(right))
+	left := mergeSort(arr[:mid])
+
+	right := mergeSort(arr[mid:])
+
+	return merge(left, right)
 }
 
-func merge(a, b []int{}){
-	result := make([]int, 0, len(left)+len(right))
-	i, j = 0, 0
-	for i < len(left) && j < len(right){
-		if left[i] < right[j]{
-			result = append(result, left[i])
+// merge объединяет два отсортированных массива в один
+func merge(a, b []int) []int {
+	result := make([]int, 0, len(a)+len(b))
+	i, j := 0, 0
+
+	for i < len(a) && j < len(b) {
+		if a[i] < b[j] {
+			result = append(result, a[i])
 			i++
+		} else {
+			result = append(result, b[j])
+			j++
 		}
-		result = append(result, right[j])
-		j++
 	}
-	result = append(result, left[i:])
-	result = append(result, right[j:])
+
+	result = append(result, a[i:]...)
+	result = append(result, b[j:]...)
+
+	return result
 }

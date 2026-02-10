@@ -155,14 +155,14 @@ func deptTraversal(root *NodeOfTree) []int {
 	return []int{}
 }
 
-func dept(root *NodeOfTree, res int) int {
+func deptt(root *NodeOfTree, res int) int {
 	if root == nil {
 		return res
 	}
 
-	dept(root.left, res)
+	deptt(root.left, res)
 	res += root.data
-	dept(root.right, res)
+	deptt(root.right, res)
 
 	return res
 }

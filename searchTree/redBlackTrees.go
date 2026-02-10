@@ -1,224 +1,343 @@
 package algs
-import (
-	"fmt"
-	"strconv"
-	"strings"
-	"math"
-)
-//cамобалансирующееся бинарное дерево(длины всех путей от корня к внешним вершинам равны между собой или отличается не больше чем на 1)
-//каждый узел черного или красного цвета
-//узлы без потомков всегда черные
-//не может быть двух красных узлов подряд
-//все пути от любого узла до листа содержат одинаковое количество черных узлов - черная высота
-//каждый узел имеет значение null, эти узлы добавляются специально и всегда черные
-//при подсчете черной высоты корень не учитывается, считаем все черные узлы и листья, высота всегда должна быть одинаковой
-//если черная высота равна от корня, то будет равна и от каждого узла
 
-//вращенияяяяяя деревьев 
-//малое левое 
-//малое правое
-//большое правое - сначала влево, потом вправо
-//большое левое - сначала направо, потом налево
-
-type Node1 struct{
-	data int
-	parent *Node
-	left *Node
-	right *Node
-	balanceFactor int
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
-func Node1(data int, parent *Node, left *Node, right *Node, balanceFactor int){
-	return &Node{
-		data : data,
-		parent : nil,
-		left : nil,
-		right : nil,
-		balanceFactor : 0,
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+// AVL ДЕРЕВО (через balanceFactor)
+type NodeAVL struct {
+	data          int
+	parent        *NodeAVL
+	left          *NodeAVL
+	right         *NodeAVL
+	balanceFactor int //разница высот: right - left
+}
+
+func NewNodeAVL(data int) *NodeAVL {
+	return &NodeAVL{
+		data:          data,
+		parent:        nil,
+		left:          nil,
+		right:         nil,
+		balanceFactor: 0,
 	}
 }
 
-type Tree struct{
-	root *Node
+type AVLTree struct {
+	root *NodeAVL
 }
-func Tree(root *Node){
-	return &Tree{
-		root : nil,
+
+func NewAVLTree() *AVLTree {
+	return &AVLTree{
+		root: nil,
 	}
 }
 
-//большое правое вращение
-func (t *Tree) Insert(key int){
-	node := &Node{data: key}
-	var p *Node = nil
+// Малый левый поворот
+func (t *AVLTree) leftRotate(x *NodeAVL) {
+	y := x.right
+	x.right = y.left
+
+	if y.left != nil {
+		y.left.parent = x
+	}
+
+	y.parent = x.parent
+
+	if x.parent == nil {
+		t.root = y
+	} else if x == x.parent.left {
+		x.parent.left = y
+	} else {
+		x.parent.right = y
+	}
+
+	y.left = x
+	x.parent = y
+
+	// Пересчёт баланс-факторов
+	x.balanceFactor = x.balanceFactor - 1 - max(0, y.balanceFactor)
+	y.balanceFactor = y.balanceFactor - 1 + min(0, x.balanceFactor)
+}
+
+// Малый правый поворот
+func (t *AVLTree) rightRotate(y *NodeAVL) {
+	x := y.left
+	y.left = x.right
+
+	if x.right != nil {
+		x.right.parent = y
+	}
+
+	x.parent = y.parent
+
+	if y.parent == nil {
+		t.root = x
+	} else if y == y.parent.right {
+		y.parent.right = x
+	} else {
+		y.parent.left = x
+	}
+
+	x.right = y
+	y.parent = x
+
+	// Пересчёт баланс-факторов
+	y.balanceFactor = y.balanceFactor + 1 - min(0, x.balanceFactor)
+	x.balanceFactor = x.balanceFactor + 1 + max(0, y.balanceFactor)
+}
+
+// Вставка в AVL-дерево
+func (t *AVLTree) Insert(key int) {
+	node := NewNodeAVL(key)
+	var parent *NodeAVL = nil
 	cur := t.root
 
-	for cur != nil{
-		p = cur
-		if key < cur.data{
+	// Поиск места для вставки
+	for cur != nil {
+		parent = cur
+		if key < cur.data {
 			cur = cur.left
+		} else {
+			cur = cur.right
 		}
-		cur = cur.right
 	}
 
-	//p - родитель нового элемента
-	node.parent = p
-	if p == nil{
+	// Вставка узла
+	node.parent = parent
+	if parent == nil {
 		t.root = node
-	
-	}else if key < p.data{
-		p.left = node
+	} else if key < parent.data {
+		parent.left = node
+	} else {
+		parent.right = node
 	}
-	p.right = node
 
-	t.updateBalance(node) //пересчёт баланса узлов и выполнение необходимых вращений для поддержания сбалансированности дерева
+	// Восстановление баланса
+	t.updateBalance(node)
 }
 
-func (t *Tree) updateBalance(node *Tree){
-	if node.balanceFactor < -1 || node.balanceFactor > 1{
-		t.reBalance(node)
+func (t *AVLTree) updateBalance(node *NodeAVL) {
+	if node == nil {
 		return
 	}
-	if node.parent != nil{
-		if node == node.parent.left{
-			node.parent.balanceFactor -= 1
 
-		}else if node == node.parent.right{
+	// Проверка на нарушение баланса
+	if node.balanceFactor < -1 || node.balanceFactor > 1 {
+		t.rebalance(node)
+		return
+	}
+
+	// Обновление баланса родителя
+	if node.parent != nil {
+		if node == node.parent.left {
+			node.parent.balanceFactor -= 1
+		} else {
 			node.parent.balanceFactor += 1
 		}
-	}
-	if node.parent.balanceFactor != nil{
-		t.updateBalance(node)
+
+		// Рекурсивное обновление вверх по дереву
+		if node.parent.balanceFactor != 0 {
+			t.updateBalance(node.parent) // ИСПРАВЛЕНО: node.parent вместо node
+		}
 	}
 }
 
-func (t *Tree) reBalance(node *Tree){
-	if node == nil{
-		return
-	}
-
-	if node.balanceFactor > 0{
-		if node.right.balanceFactor < 0{
+func (t *AVLTree) rebalance(node *NodeAVL) {
+	if node.balanceFactor > 1 {
+		// Правое поддерево тяжелее
+		if node.right.balanceFactor < 0 {
+			// Большое левое вращение (правый-левый)
 			t.rightRotate(node.right)
 			t.leftRotate(node)
+		} else {
+			// Малое левое вращение
+			t.leftRotate(node)
 		}
-		t.leftRotate(node)
-	
-	}else if node.balanceFactor < 0{
-	if node.left.balanceFactor > 0{
-		t.leftRotate(node.left)
-		t.rightRotate(node)
+	} else if node.balanceFactor < -1 {
+		// Левое поддерево тяжелее
+		if node.left.balanceFactor > 0 {
+			// Большое правое вращение (левый-правый)
+			t.leftRotate(node.left)
+			t.rightRotate(node)
+		} else {
+			// Малое правое вращение
+			t.rightRotate(node)
+		}
 	}
-	t.rightRotate(node)
-}
-}
-
-func (t *Tree) leftRotate( node *Tree){
-	rightChild := node.right
-
-	node.right = rightChild.left //правый потомок становится на место текущего узла, а его левое поддерево перемещается в правое поддерево текущего узла
-	if rightChild.left != nil{ //если у правого потомка есть левое поддерево
-		rightChild.left.parent = node //родитель обновляется на текущий узел
-	}
-
-	rightChild.parent = node.parent //правый потомок становится на место текущего узла, поэтому его родитель должен быть обновлён
-	if node.parent != nil{ //если текущий узел был корнем
-		t.root = rightChild //правый потомок становится ноым корнем
-	
-	}else if node == node.parent.left{ //если текущий узел был потомком своего родителя
-		node.parent.left = rightChild //родительский указатель обновляется на правого потомка
-	}
-	node.parent.right = rightchild //обновляется правый указатель родителя
-
-	rightChild.left = node
-	node.parent = rightChild //после перемещения узел становится левым потомком правого потомка
-
-	node.balanceFactor = node.balanceFactor - 1 -max(0, rightChild.balanceFactor)
-	rightChild.balanceFactor = rightChild.balanceFactor - 1 + min(0, node.balanceFactor)
 }
 
-const(
-		Red = 1
-		Black = 0
-	)
+// КРАСНО-ЧЕРНОЕ ДЕРЕВО (через цвета)
+const (
+	Red   = 1
+	Black = 0
+)
 
-type NodeBlack struct{
-		data int
-		left *Node
-		right *Node
-		parent *Node
-		color int
-	}
-type RedBlackTree struct{
-	Node *NodeBlack
-	
+type NodeRB struct {
+	data   int
+	left   *NodeRB
+	right  *NodeRB
+	parent *NodeRB
+	color  int
 }
-func InitNode(data int) *Node{
-	return &Node{
-		data: data,
-		left: nil,
-		right: nil,
+
+func NewNodeRB(data int) *NodeRB {
+	return &NodeRB{
+		data:   data,
+		left:   nil,
+		right:  nil,
 		parent: nil,
-		color: Red,
+		color:  Red, // Новый узел всегда красный
 	}
 }
 
-func (t *RedBlackTree) Insertt(data int){//O(log n)
-	newNode := &Node{data: data, color: red}
+type RedBlackTree struct {
+	root *NodeRB
+}
+
+func NewRedBlackTree() *RedBlackTree {
+	return &RedBlackTree{
+		root: nil,
+	}
+}
+
+// Левый поворот для красно-черного дерева
+func (t *RedBlackTree) leftRotate(x *NodeRB) {
+	y := x.right
+	x.right = y.left
+
+	if y.left != nil {
+		y.left.parent = x
+	}
+
+	y.parent = x.parent
+
+	if x.parent == nil {
+		t.root = y
+	} else if x == x.parent.left {
+		x.parent.left = y
+	} else {
+		x.parent.right = y
+	}
+
+	y.left = x
+	x.parent = y
+}
+
+// Правый поворот для красно-черного дерева
+func (t *RedBlackTree) rightRotate(y *NodeRB) {
+	x := y.left
+	y.left = x.right
+
+	if x.right != nil {
+		x.right.parent = y
+	}
+
+	x.parent = y.parent
+
+	if y.parent == nil {
+		t.root = x
+	} else if y == y.parent.right {
+		y.parent.right = x
+	} else {
+		y.parent.left = x
+	}
+
+	x.right = y
+	y.parent = x
+}
+
+// Вставка в красно-черное дерево
+func (t *RedBlackTree) Insert(data int) {
+	newNode := NewNodeRB(data)
 	t.insertNode(newNode)
 	t.fixInsert(newNode)
 }
 
-func (t *RedBlackTree) fixInsert(node *Node){
-	//восстановление дерева после вставки
-	for node.parent && node.parent.color == Red{
-		if node.parent == node.parent.parent.left{
-			//родительский узел является левым потомком своего родителя
+// Вспомогательный метод для вставки узла (без балансировки)
+func (t *RedBlackTree) insertNode(node *NodeRB) {
+	var parent *NodeRB = nil
+	cur := t.root
+
+	for cur != nil {
+		parent = cur
+		if node.data < cur.data {
+			cur = cur.left
+		} else {
+			cur = cur.right
+		}
+	}
+
+	node.parent = parent
+	if parent == nil {
+		t.root = node
+	} else if node.data < parent.data {
+		parent.left = node
+	} else {
+		parent.right = node
+	}
+}
+
+// Восстановление свойств красно-черного дерева после вставки
+func (t *RedBlackTree) fixInsert(node *NodeRB) {
+	for node.parent != nil && node.parent.color == Red {
+		if node.parent == node.parent.parent.left {
+			// Родитель — левый потомок дедушки
 			uncle := node.parent.parent.right
-		}
 
-		if uncle && uncle.color == Red{
-			//дядя красный - перекрашиваем родителя, дядю и дедушку
-			node.parent.color = Black
-			uncle.color = Black
-			node.parent.parent.color = red
-			//переходим к дедушке
-			node = node.parent.parent
-		
-		}if else{
-			if node == node.parent.right{
-			//узел является правым потомком своего родителя - делаем правый поворот
-			node = node.parent
-			node.leftRotate(node)
-		}
-		//изменяем цвета и делаем правый поворот
-		node.parent.color = Black
-		node.parent.parent.color = Red
-		node.rightRotate(node.parent.parent)
-		
-		}if else{
-			//родительский узел является правым потомком своего родителя
-			uncle = node.parent.leftRotate
-
-			if uncle && uncle.color == Red{
-				//дядя тоже красный - перекрашиваем родителя, дядю и дедушку
+			if uncle != nil && uncle.color == Red {
+				// Случай 1: дядя красный
 				node.parent.color = Black
 				uncle.color = Black
 				node.parent.parent.color = Red
-				//переходим к дедушке
 				node = node.parent.parent
-			}else{
-				if node == node.parent.left{
-					//узел является левым потомком своего родителя - делаем правый поворот
+			} else {
+				// Случай 2: дядя черный
+				if node == node.parent.right {
 					node = node.parent
-					node.rightRotate(node)
+					t.leftRotate(node)
 				}
-				//изменим цвета и делаем левый поворот
+				// Случай 3
 				node.parent.color = Black
 				node.parent.parent.color = Red
-				node.leftRotate(node.parent.parent)
+				t.rightRotate(node.parent.parent)
+			}
+		} else {
+			// Симметричный случай: родитель — правый потомок дедушки
+			uncle := node.parent.parent.left
+
+			if uncle != nil && uncle.color == Red {
+				// Случай 1: дядя красный
+				node.parent.color = Black
+				uncle.color = Black
+				node.parent.parent.color = Red
+				node = node.parent.parent
+			} else {
+				// Случай 2: дядя черный
+				if node == node.parent.left {
+					node = node.parent
+					t.rightRotate(node)
+				}
+				// Случай 3
+				node.parent.color = Black
+				node.parent.parent.color = Red
+				t.leftRotate(node.parent.parent)
 			}
 		}
 	}
-	node.root.color = Black
-	//корень всегда черный
+
+	// Корень всегда черный
+	if t.root != nil {
+		t.root.color = Black
+	}
 }
